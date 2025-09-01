@@ -9,6 +9,7 @@ function prettyDiff(document, range) {
   let prettiedOutput = "";
   let options = prettydiff.options;
 
+  // Tab / indent config
   let tabSize = editor.tabSize;
   let indentChar = " ";
 
@@ -21,9 +22,16 @@ function prettyDiff(document, range) {
     indentChar = "\t";
   }
 
+  // Extract and temporarily replace <script> blocks
   const regex = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
   let sourceCode = document.getText(range);
-  const commentedScripts = sourceCode.replace(regex, "{#!-- $& --!#}");
+
+  const scripts = [];
+  const placeholder = "___SCRIPT_PLACEHOLDER___";
+  const commentedScripts = sourceCode.replace(regex, (match) => {
+    scripts.push(match);
+    return placeholder;
+  });
 
   // Set configuration
   options.source = commentedScripts;
@@ -61,7 +69,7 @@ function prettyDiff(document, range) {
   options.preserve_comment = config.preserveComment;
   options.quote_convert = config.quoteConvert;
   options.space = config.space;
-  options.space_close = config.spaceSlose;
+  options.space_close = config.spaceClose;
   options.tag_merge = config.tagMerge;
   options.tag_sort = config.tagSort;
   options.ternary_line = config.ternaryLine;
@@ -72,7 +80,10 @@ function prettyDiff(document, range) {
 
   prettiedOutput = prettydiff();
 
-  let modifiedSourceCode = prettiedOutput.replace(/{#!--| --!#}/g, "");
+  let modifiedSourceCode = prettiedOutput;
+  scripts.forEach((script) => {
+    modifiedSourceCode = modifiedSourceCode.replace(placeholder, script);
+  });
 
   options.end = 0;
   options.start = 0;
