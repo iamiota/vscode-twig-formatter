@@ -27,7 +27,7 @@ function prettyDiff(document, range) {
   let sourceCode = document.getText(range);
 
   const scripts = [];
-  const placeholder = "___SCRIPT_PLACEHOLDER___";
+  const placeholder = "<div>___SCRIPT_PLACEHOLDER___</div>";
   const commentedScripts = sourceCode.replace(regex, (match) => {
     scripts.push(match);
     return placeholder;
